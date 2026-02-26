@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import csv
 import click
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_cloud_sdk_core.api_exception import ApiException
@@ -89,18 +90,33 @@ def get_resources(resource_group):
         assert next_page is not None
         all_results.extend(next_page)
 
-# print(json.dumps(all_results, indent=2))
+    # print(json.dumps(all_results, indent=2))
 
     resource_instances = []
     for result in all_results:
         resource_instances.append({
-            'name': result.get('name'),
-            'state': result.get('state'),
-            'region': result.get('region_id')
+            'name' : result.get('name'),
+            'state' : result.get('state'),
+            'region' : result.get('region_id'),
+            'created_at' : result.get('created_at'),
+            'created_by' : result.get('created_by'),
+            'resource_group_id' : result.get('resource_group_id'),
+            'type': result.get('type'),
+            'resource_id' : result.get('resource_id')
         })
 
-    print(json.dumps(resource_instances, indent=2))
+    
+
+    with open('resource_instances.csv', 'w', newline='') as csvfile:
+        fieldnames = ['name', 'state', 'region', 'created_at', 'created_by', 'resource_group_id', 'type', 'resource_id']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(resource_instances)
+    
+    return resource_instances
+
 # for result in all_results:
+
 #     print(f"name: {result.name}")
 
 if __name__ == '__main__':
